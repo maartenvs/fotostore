@@ -1,0 +1,8 @@
+/target/
+/target-eclipse/
+/.classpath
+/.project
+/.settings/
+/plugins/
+
+/groovy.util.ConfigObject@*
