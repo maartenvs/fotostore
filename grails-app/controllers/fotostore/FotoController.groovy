@@ -92,6 +92,21 @@ class FotoController {
         }
     }
 
+    /**
+     * Returns the binary image data.
+     */
+    def image(Foto fotoInstance) {
+
+        if (fotoInstance == null) {
+            notFound()
+            return
+        }
+
+        response.contentType = "image/jpeg"
+        response.contentLength = fotoInstance.image ? fotoInstance.image.length : 0
+        response.outputStream << fotoInstance.image
+    }
+
     protected void notFound() {
         request.withFormat {
             form multipartForm {

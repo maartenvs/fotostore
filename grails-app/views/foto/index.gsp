@@ -36,7 +36,7 @@
 					
 						<td><g:link action="show" id="${fotoInstance.id}">${fieldValue(bean: fotoInstance, field: "type")}</g:link></td>
 					
-						<td>${fieldValue(bean: fotoInstance, field: "image")}</td>
+						<td>${fotoInstance.image.length > 0 ? fotoInstance.image[0] : "--"}</td>
 					
 					</tr>
 				</g:each>

@@ -46,7 +46,11 @@
 					<span id="fotos-label" class="property-label"><g:message code="encounter.fotos.label" default="Fotos" /></span>
 					
 						<g:each in="${encounterInstance.fotos}" var="f">
-						<span class="property-value" aria-labelledby="fotos-label"><g:link controller="foto" action="show" id="${f.id}">${f?.encodeAsHTML()}</g:link></span>
+							<span class="property-value" aria-labelledby="fotos-label">
+								<p><g:fieldValue bean="${f}" field="type"/></p>
+								<p><img src="${createLink(action: 'image', controller: 'foto', id: f.id)}"/></p>
+								<hr/>
+							</span>
 						</g:each>
 					
 				</li>

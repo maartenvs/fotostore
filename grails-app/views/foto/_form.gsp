@@ -16,7 +16,7 @@
 		<g:message code="foto.image.label" default="Image" />
 		<span class="required-indicator">*</span>
 	</label>
-	<input type="file" id="image" name="image" />
+	<g:field name="image" type="file" accept="image/*"/>
 
 </div>
 
