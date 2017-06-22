@@ -8,7 +8,7 @@ import grails.transaction.Transactional
 @Transactional(readOnly = true)
 class EncounterController {
 
-    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
+    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE", addFoto: "POST"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
@@ -92,6 +92,33 @@ class EncounterController {
         }
     }
 
+    @Transactional
+    def addFoto(AddFotoCommand command) {
+        Encounter encounter = Encounter.get(command.id)
+        if (encounter == null) {
+            notFound()
+            return
+        }
+
+        command.validate()
+        if (command.hasErrors()) {
+            respond command.errors, view:'show'
+            return
+        }
+
+        def foto = new Foto(type: command.type, image: command.image)
+        encounter.addToFotos(foto)
+        encounter.save flush:true
+
+        request.withFormat {
+            form multipartForm {
+                flash.message = message(code: 'default.updated.message', args: [message(code: 'Encounter.label', default: 'Encounter'), encounter.id])
+                redirect encounter
+            }
+            '*'{ respond encounter, [status: OK] }
+        }
+    }
+
     protected void notFound() {
         request.withFormat {
             form multipartForm {
@@ -100,5 +127,17 @@ class EncounterController {
             }
             '*'{ render status: NOT_FOUND }
         }
+    }
+}
+
+@grails.validation.Validateable
+class AddFotoCommand {
+    long id
+    String type
+    byte[] image
+
+    static constraints = {
+        type nullable: false, blank: false
+        image nullable: false, maxSize: 1024 * 1024 * 20
     }
 }

@@ -41,6 +41,30 @@
 				</li>
 				</g:if>
 			
+				<g:form url="[resource:encounterInstance, action:'addFoto']" method="POST" enctype="multipart/form-data">
+					<g:hiddenField name="version" value="${encounterInstance?.version}" />
+					<p>Add foto:</p>
+					<fieldset class="form">
+						<div class="fieldcontain required">
+							<label for="type">
+								<g:message code="foto.type.label" default="Type" />
+								<span class="required-indicator">*</span>
+							</label>
+							<g:textField name="type" required="" value=""/>
+						</div>
+						<div class="fieldcontain required">
+							<label for="image">
+								<g:message code="foto.image.label" default="Image" />
+								<span class="required-indicator">*</span>
+							</label>
+							<g:field name="image" type="file" accept="image/*"/>
+						</div>
+					</fieldset>
+					<fieldset class="buttons">
+						<g:actionSubmit class="save" action="addFoto" value="${message(code: 'default.button.addFoto.label', default: 'Add foto')}" />
+					</fieldset>
+				</g:form>
+
 				<g:if test="${encounterInstance?.fotos}">
 				<li class="fieldcontain">
 					<span id="fotos-label" class="property-label"><g:message code="encounter.fotos.label" default="Fotos" /></span>
