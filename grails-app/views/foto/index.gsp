@@ -28,6 +28,8 @@
 					
 						<g:sortableColumn property="image" title="${message(code: 'foto.image.label', default: 'Image')}" />
 					
+						<g:sortableColumn property="contentType" title="${message(code: 'foto.contentType.label', default: 'Content Type')}" />
+					
 					</tr>
 				</thead>
 				<tbody>
@@ -37,6 +39,8 @@
 						<td><g:link action="show" id="${fotoInstance.id}">${fieldValue(bean: fotoInstance, field: "type")}</g:link></td>
 					
 						<td>${fotoInstance.image.length > 0 ? fotoInstance.image[0] : "--"}</td>
+					
+						<td>${fieldValue(bean: fotoInstance, field: "contentType")}</td>
 					
 					</tr>
 				</g:each>
