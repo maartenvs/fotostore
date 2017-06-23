@@ -6,6 +6,7 @@ class UrlMappings {
                 // apply constraints here
             }
         }
+        "/limitedAccess/image/$key?" (controller: "limitedAccess", action: "image")
 
         "/"(view:"/index")
         "500"(view:'/error')
