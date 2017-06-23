@@ -8,20 +8,8 @@ import grails.transaction.Transactional
 @Transactional(readOnly = true)
 class FotoController {
 
+    static scaffold = true
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
-
-    def index(Integer max) {
-        params.max = Math.min(max ?: 10, 100)
-        respond Foto.list(params), model:[fotoInstanceCount: Foto.count()]
-    }
-
-    def show(Foto fotoInstance) {
-        respond fotoInstance
-    }
-
-    def create() {
-        respond new Foto(params)
-    }
 
     @Transactional
     def save(Foto fotoInstance) {
@@ -46,10 +34,6 @@ class FotoController {
         }
     }
 
-    def edit(Foto fotoInstance) {
-        respond fotoInstance
-    }
-
     @Transactional
     def update(Foto fotoInstance) {
         if (fotoInstance == null) {
@@ -70,25 +54,6 @@ class FotoController {
                 redirect fotoInstance
             }
             '*'{ respond fotoInstance, [status: OK] }
-        }
-    }
-
-    @Transactional
-    def delete(Foto fotoInstance) {
-
-        if (fotoInstance == null) {
-            notFound()
-            return
-        }
-
-        fotoInstance.delete flush:true
-
-        request.withFormat {
-            form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'Foto.label', default: 'Foto'), fotoInstance.id])
-                redirect action:"index", method:"GET"
-            }
-            '*'{ render status: NO_CONTENT }
         }
     }
 
