@@ -18,6 +18,9 @@ class FotoController {
             return
         }
 
+        fotoInstance.contentType = params.image?.contentType
+
+        fotoInstance.validate()
         if (fotoInstance.hasErrors()) {
             respond fotoInstance.errors, view:'create'
             return
@@ -41,6 +44,9 @@ class FotoController {
             return
         }
 
+        fotoInstance.contentType = params.image?.contentType
+
+        fotoInstance.validate()
         if (fotoInstance.hasErrors()) {
             respond fotoInstance.errors, view:'edit'
             return
@@ -67,8 +73,8 @@ class FotoController {
             return
         }
 
-        response.contentType = "image/jpeg"
-        response.contentLength = fotoInstance.image ? fotoInstance.image.length : 0
+        response.contentType =   fotoInstance.contentType ?: "image/jpeg"
+        response.contentLength = fotoInstance.image?.length
         response.outputStream << fotoInstance.image
     }
 

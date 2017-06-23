@@ -13,6 +13,8 @@ class EncounterController {
 
     @Transactional
     def addFoto(AddFotoCommand command) {
+        def contentType = params.image?.contentType
+
         Encounter encounter = Encounter.get(command.id)
         if (encounter == null) {
             notFound()
@@ -25,7 +27,7 @@ class EncounterController {
             return
         }
 
-        def foto = new Foto(type: command.type, image: command.image)
+        def foto = new Foto(type: command.type, image: command.image, contentType: contentType)
         encounter.addToFotos(foto)
         encounter.save flush:true
 
