@@ -54,7 +54,7 @@
 										${createLink(action: 'image', controller: 'limitedAccess', params: [key: processedFoto.temporaryAccess.key], absolute: true)}
 									</g:link>
 								</p>
-								<hr/>
+								<p>&nbsp;</p>
 							</span>
 						</g:each>
 					
