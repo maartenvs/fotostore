@@ -50,6 +50,19 @@
 				</li>
 				</g:if>
 			
+				<g:if test="${limitedAccessInstance?.key}">
+				<li class="fieldcontain">
+					<span id="url-label" class="property-label"><g:message code="limitedAccess.url.label" default="Limimted access URL" /></span>
+					
+						<span class="property-value" aria-labelledby="url-label">
+							<g:link controller="limitedAccess" action="image" params="[key: limitedAccessInstance.key]">
+								${createLink(action: 'image', controller: 'limitedAccess', params: [key: limitedAccessInstance.key], absolute: true)}
+							</g:link>
+						</span>
+					
+				</li>
+				</g:if>
+			
 			</ol>
 			<g:form url="[resource:limitedAccessInstance, action:'delete']" method="DELETE">
 				<fieldset class="buttons">
