@@ -11,6 +11,8 @@ class EncounterController {
     static scaffold = true
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE", addFoto: "POST"]
 
+    def limitedAccessService
+
     @Transactional
     def addFoto(AddFotoCommand command) {
         def contentType = params.image?.contentType
@@ -38,6 +40,18 @@ class EncounterController {
             }
             '*'{ respond encounter, [status: OK] }
         }
+    }
+
+    def process(Encounter encounter) {
+        Date now = new Date()
+        def processedFotos = encounter.fotos.collect { foto ->
+            [
+                foto: foto,
+                temporaryAccess: limitedAccessService.newAccess(now, foto)
+            ]
+        }
+
+        respond encounter, model: [ processedFotos: processedFotos ]
     }
 
     protected void notFound() {
