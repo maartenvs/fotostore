@@ -25,7 +25,7 @@
 		<g:message code="limitedAccess.start.label" default="Start" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:datePicker name="start" precision="day"  value="${limitedAccessInstance?.start}"  />
+	<g:datePicker name="start" precision="minute"  value="${limitedAccessInstance?.start}"  />
 
 </div>
 
