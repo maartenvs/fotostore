@@ -43,6 +43,11 @@ class EncounterController {
     }
 
     def process(Encounter encounter) {
+        if (encounter == null) {
+            notFound()
+            return
+        }
+
         Date now = new Date()
         def processedFotos = encounter.fotos.collect { foto ->
             [
