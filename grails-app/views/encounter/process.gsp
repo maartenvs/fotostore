@@ -61,6 +61,20 @@
 				</li>
 				</g:if>
 			
+				<li class="fieldcontain">
+					<span id="httpResult-label" class="property-label"><g:message code="encounter.process.httpResult.label" default="HTTP result" /></span>
+					
+						<span class="property-value" aria-labelledby="httpResult-label">${httpResult}</span>
+					
+				</li>
+
+				<li class="fieldcontain">
+					<span id="jobId-label" class="property-label"><g:message code="encounter.process.jobId.label" default="Job ID" /></span>
+					
+						<span class="property-value" aria-labelledby="jobId-label">${jobId}</span>
+					
+				</li>
+
 			</ol>
 			<fieldset class="buttons">
 				<g:link class="save" action="process" resource="${encounterInstance}"><g:message code="default.button.process.label" default="Process" /></g:link>

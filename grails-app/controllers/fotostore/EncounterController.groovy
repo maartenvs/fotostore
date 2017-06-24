@@ -1,9 +1,19 @@
 package fotostore
 
 
+import java.security.cert.X509Certificate
+import java.security.cert.CertificateException
 
-import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
+import groovyx.net.http.ContentType
+import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.HttpResponseException
+import groovyx.net.http.Method
+import org.apache.http.conn.scheme.Scheme
+import org.apache.http.conn.ssl.SSLSocketFactory
+import org.apache.http.conn.ssl.TrustStrategy
+import static org.springframework.http.HttpStatus.*
+
 
 @Transactional(readOnly = true)
 class EncounterController {
@@ -42,6 +52,18 @@ class EncounterController {
         }
     }
 
+    /**
+     * Temporary mock for the external image processing server.
+     */
+    def log() {
+        def now = new Date()
+        def jobId = now.getTime() % 100000
+        def message = "Action ${params.action} @ $now with q=${params.q}, job $jobId"
+        println "request " + request.JSON
+        println message
+        respond message: message, id: jobId
+    }
+
     def process(Encounter encounter) {
         if (encounter == null) {
             notFound()
@@ -56,7 +78,25 @@ class EncounterController {
             ]
         }
 
-        respond encounter, model: [ processedFotos: processedFotos ]
+        def requestBody = [
+            name: encounter.name,
+            images: processedFotos.collect {
+                [
+                    name: it.foto.type,
+                    url: createLink(action: 'image', controller: 'limitedAccess', params: [key: it.temporaryAccess.key], absolute: true)
+                ]
+            }
+        ]
+        def httpResult = httpRequest("https://localhost:8443", "/fotostore/encounter/log.json", requestBody)
+
+        respond(
+            encounter,
+            model: [
+                processedFotos: processedFotos,
+                httpResult:     httpResult.status,
+                jobId:          httpResult.json.id
+            ]
+        )
     }
 
     protected void notFound() {
@@ -67,6 +107,38 @@ class EncounterController {
             }
             '*'{ render status: NOT_FOUND }
         }
+    }
+
+    static httpRequest(String baseUrl, String path, Map query) {
+        def result
+        try {
+            def http = new HTTPBuilder(baseUrl)
+            setIgnoreSSLIssues(http)
+            http.request(Method.POST, ContentType.JSON) {
+                uri.path = path
+                body = query
+                response.success = { resp, json ->
+                    result = [ status: "${resp.status} ${resp.statusLine}", json: json ]
+                }
+                response.failure = { resp, reader ->
+                    result = [ status: "${resp.status} ${resp.statusLine}", json: null ]
+                }
+            }
+        }
+        catch (java.net.ConnectException e) {
+            result = [ status: "ConnectException, ${e.message}", json: null ]
+        }
+        return result
+    }
+
+    static setIgnoreSSLIssues(HTTPBuilder builder) {
+        TrustStrategy trustStrat = new TrustStrategy() {
+            public boolean isTrusted(X509Certificate[] chain, String authtype) throws CertificateException {
+                 return true;
+            }
+        }
+        SSLSocketFactory sslSocketFactory = new SSLSocketFactory(trustStrat, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        builder.client.connectionManager.schemeRegistry.register(new Scheme("https", 443, sslSocketFactory))
     }
 }
 
