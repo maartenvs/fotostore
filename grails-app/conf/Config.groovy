@@ -88,6 +88,8 @@ grails.hibernate.osiv.readonly = false
 environments {
     development {
         grails.logging.jul.usebridge = true
+        rest.https.keystore.path = "target/work/ssl/keystore"
+        rest.https.keystore.pass = "123456" // Default used by Tomcat plugin
     }
     production {
         grails.logging.jul.usebridge = false

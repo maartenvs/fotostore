@@ -42,6 +42,12 @@ class EncounterController {
         }
     }
 
+    def log() {
+        def now = new Date()
+        println "Action ${params.action} @ $now with q=${params.q}"
+        render "logged @ $now with q=${params.q}"
+    }
+
     def process(Encounter encounter) {
         if (encounter == null) {
             notFound()
@@ -54,6 +60,12 @@ class EncounterController {
                 foto: foto,
                 temporaryAccess: limitedAccessService.newAccess(now, foto)
             ]
+        }
+
+        withHttp(uri: "https://localhost:8443") {
+            def html = get(path : '/fotostore/encounter/log', query : [q:'Groovy'])
+            assert html.HEAD.size() == 1
+            assert html.BODY.size() == 1
         }
 
         respond encounter, model: [ processedFotos: processedFotos ]
