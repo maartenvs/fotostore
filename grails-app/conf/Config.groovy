@@ -115,3 +115,6 @@ log4j.main = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 }
+
+fotostore.imageService.baseUrl = "https://localhost:8443"
+fotostore.imageService.path    = "/fotostore/encounter/log.json"

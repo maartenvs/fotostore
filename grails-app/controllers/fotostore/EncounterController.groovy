@@ -65,6 +65,16 @@ class EncounterController {
     }
 
     def process(Encounter encounter) {
+        def baseUrl = grailsApplication.config.fotostore.imageService.baseUrl
+        def path    = grailsApplication.config.fotostore.imageService.path
+        if (!baseUrl || !path) {
+            def message = "baseUrl and/or path for image service not configured"
+            log.error message
+            flash.message = message
+            render(view: "process", model: [encounterInstance: encounter], status: INTERNAL_SERVER_ERROR)
+            return
+        }
+
         if (encounter == null) {
             notFound()
             return
@@ -87,14 +97,14 @@ class EncounterController {
                 ]
             }
         ]
-        def httpResult = httpRequest("https://localhost:8443", "/fotostore/encounter/log.json", requestBody)
+        def httpResult = httpRequest(baseUrl, path, requestBody)
 
         respond(
             encounter,
             model: [
                 processedFotos: processedFotos,
                 httpResult:     httpResult.status,
-                jobId:          httpResult.json.id
+                jobId:          httpResult.json?.id
             ]
         )
     }
