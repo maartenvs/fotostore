@@ -4,6 +4,7 @@ package fotostore
 import java.security.cert.X509Certificate
 import java.security.cert.CertificateException
 
+import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
@@ -52,6 +53,15 @@ class EncounterController {
         }
     }
 
+    /**
+     * This action should not use a transaction, because it causes some
+     * LimitedAccess objects to be stored (in a subtransaction in the
+     * LimitedAccessService) and then calls the external service. That service,
+     * in turn, will need the created LimitedAccess objects. By that time, the
+     * LimitedAccessService transaction should be committed, otherwise the calls
+     * from the external service will not find the new objects.
+     */
+    @NotTransactional
     def process(Encounter encounter) {
         def baseUrl = grailsApplication.config.fotostore.imageService.baseUrl
         def path    = grailsApplication.config.fotostore.imageService.path

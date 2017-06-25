@@ -39,6 +39,18 @@
           <con:params/>
           <con:element>data</con:element>
         </con:representation>
+        <con:representation type="RESPONSE">
+          <con:mediaType>text/html; charset=iso-8859-1</con:mediaType>
+          <con:status>200</con:status>
+          <con:params/>
+          <con:element>html</con:element>
+        </con:representation>
+        <con:representation type="RESPONSE">
+          <con:mediaType>image/jpeg</con:mediaType>
+          <con:status>200</con:status>
+          <con:params/>
+          <con:element>data</con:element>
+        </con:representation>
         <con:request name="Get image" id="199c57d6-1a4c-497e-b61f-e19530234383" mediaType="application/json">
           <con:settings>
             <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
@@ -61,6 +73,42 @@
       </con:method>
     </con:resource>
   </con:interface>
+  <con:testSuite id="b942c842-1276-4643-a691-e830399e18ce" name="Get Image">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+    <con:testCase id="138408e6-7dba-4fe8-9e3f-5cee8ce8fef0" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Get Image" searchProperties="true">
+      <con:settings/>
+      <con:testStep type="restrequest" name="Get Image" id="4f0327d0-6c7a-45ec-8c49-d95aa39c1dc3">
+        <con:settings/>
+        <con:config service="https://localhost:8443" methodName="Fotostore" resourcePath="/fotostore/limitedAccess/image/{key}" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:restRequest name="Get Image" id="85067397-3e2f-48b2-9367-ca14537dd31e" mediaType="application/json">
+            <con:settings>
+              <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+            </con:settings>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>https://localhost:8443/</con:endpoint>
+            <con:request/>
+            <con:originalUri>http://localhost/fotostore/limitedAccess/image/gxzM-6Nn2eC1cIFQ8mSMWw</con:originalUri>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:parameters>
+              <entry key="key" value="2ldG1ZsakYLBSEt1M08SiA" xmlns="http://eviware.com/soapui/config"/>
+            </con:parameters>
+          </con:restRequest>
+        </con:config>
+      </con:testStep>
+      <con:properties>
+        <con:property>
+          <con:name>key</con:name>
+          <con:value>UNJ1DuCLlChi6-ZaB85s7g</con:value>
+        </con:property>
+      </con:properties>
+    </con:testCase>
+    <con:properties/>
+  </con:testSuite>
   <con:restMockService id="dfa2399e-6346-477c-834d-6dabd1d846dc" port="8089" path="/imageService" host="ml" name="Image processor" docroot="">
     <con:settings/>
     <con:properties/>
@@ -125,11 +173,47 @@ if( requestBody.contains("some data") )
         <con:settings/>
         <con:script>import groovy.json.JsonSlurper
 
+// Take the URLs of the images from the request,
+// download each of them,
+// store them in a file.
+
 def processRequest = new JsonSlurper().parseText(mockRequest.requestContent)
 
 log.info "Request named `${processRequest.name}'"
 log.info "-- Images:"
-processRequest.images.each { log.info "       name ${it.name}, url ${it.url}" }
+
+// get target testcase and teststep
+def project = mockResponse.mockOperation.mockService.project
+def getImageTestCase = project.testSuites["Get Image"].testCases["Get Image"]
+def getImageTestStep = getImageTestCase.testSteps["Get Image"]
+
+File outputDir = context.outputDir
+if (!outputDir) {
+	outputDir = File.createTempDir()
+	context.outputDir = outputDir
+}
+
+processRequest.images.each { image ->
+    log.info "       name ${image.name}, url ${image.url}"
+    def matcher = image.url =~ /\/([-a-zA-Z0-9_]+)$/
+    def key = matcher[0][1]
+    log.info "       key " + key
+
+    getImageTestStep.setPropertyValue( "key", key )
+
+    // run testCase to download the image.
+    def runner = getImageTestCase.run( new com.eviware.soapui.support.types.StringToObjectMap(), false )
+    if (runner.status.toString() == "FINISHED") {
+        requestContext.jobId += " Success"
+        def outputFile = new File(outputDir, "image-${processRequest.name}-${image.name}-${key}.dat")
+        log.info "       Storing in " + outputFile
+        outputFile.bytes = getImageTestStep.testRequest.response.rawResponseData
+    }
+    else {
+        requestContext.jobId += " Error: " + runner.reason
+    }
+}
+
 requestContext.jobId = "${processRequest.name}-${new Date().getTime() % 100000}"
 log.info "-- Created job " + requestContext.jobId</con:script>
         <con:responseContent>{"message":"Greetings from SoapUI", "id":"${jobId}"}</con:responseContent>
