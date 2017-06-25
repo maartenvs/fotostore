@@ -52,18 +52,6 @@ class EncounterController {
         }
     }
 
-    /**
-     * Temporary mock for the external image processing server.
-     */
-    def log() {
-        def now = new Date()
-        def jobId = now.getTime() % 100000
-        def message = "Action ${params.action} @ $now with q=${params.q}, job $jobId"
-        println "request " + request.JSON
-        println message
-        respond message: message, id: jobId
-    }
-
     def process(Encounter encounter) {
         def baseUrl = grailsApplication.config.fotostore.imageService.baseUrl
         def path    = grailsApplication.config.fotostore.imageService.path
