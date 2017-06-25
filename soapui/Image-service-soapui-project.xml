@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="8714f3c3-98ee-405f-966f-e11540a49e91" activeEnvironment="Default" name="Image service" resourceRoot="" soapui-version="5.2.1" xmlns:con="http://eviware.com/soapui/config">
+<con:soapui-project id="8714f3c3-98ee-405f-966f-e11540a49e91" activeEnvironment="Default" name="Image service" resourceRoot="" soapui-version="5.2.1" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config">
   <con:settings/>
   <con:interface xsi:type="con:RestService" id="7fa815f3-a201-438b-841f-e5ba983450c7" wadlVersion="http://wadl.dev.java.net/2009/02" name="https://localhost:8443" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <con:settings/>
@@ -64,6 +64,7 @@
   <con:restMockService id="dfa2399e-6346-477c-834d-6dabd1d846dc" port="8089" path="/imageService" host="ml" name="Image processor" docroot="">
     <con:settings/>
     <con:properties/>
+    <con:onRequestScript/>
     <con:restMockAction name="/process" method="POST" resourcePath="/process" id="3a39bbf6-ef4d-4d25-8428-27410a50d748">
       <con:settings/>
       <con:defaultResponse xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
@@ -122,7 +123,16 @@ if( requestBody.contains("some data") )
 */</con:dispatchPath>
       <con:response name="Success" id="9896ee67-db11-4af5-b39a-9caf185437e4" httpResponseStatus="200" mediaType="application/json">
         <con:settings/>
-        <con:responseContent>{"message":"Greetings from mock", "id":"always 6"}</con:responseContent>
+        <con:script>import groovy.json.JsonSlurper
+
+def processRequest = new JsonSlurper().parseText(mockRequest.requestContent)
+
+log.info "Request named `${processRequest.name}'"
+log.info "-- Images:"
+processRequest.images.each { log.info "       name ${it.name}, url ${it.url}" }
+requestContext.jobId = "${processRequest.name}-${new Date().getTime() % 100000}"
+log.info "-- Created job " + requestContext.jobId</con:script>
+        <con:responseContent>{"message":"Greetings from SoapUI", "id":"${jobId}"}</con:responseContent>
       </con:response>
     </con:restMockAction>
   </con:restMockService>
